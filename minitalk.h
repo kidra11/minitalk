@@ -19,6 +19,4 @@
 # include <time.h>
 # include "ft_printf/libftprintf.h"
 
-
-
 #endif
