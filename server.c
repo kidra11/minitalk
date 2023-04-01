@@ -15,6 +15,13 @@
 int	len = 0;
 unsigned char	c = 0;
 
+void printBinary(unsigned int num) {
+	if (num > 1) {
+		printBinary(num / 2);
+	}
+	ft_printf("%d", num % 2);
+}
+
 unsigned char reverse_bits(unsigned char x) {
 	unsigned char	y;
 	int				i;
@@ -26,21 +33,16 @@ unsigned char reverse_bits(unsigned char x) {
 		y = (y << 1) | (x & 1);
 		x >>= 1;
 	}
+	printBinary(y);
+	ft_printf("\n");
 	return (y);
-}
-
-void printBinary(unsigned int num) {
-	if (num > 1) {
-		printBinary(num / 2);
-	}
-	ft_printf("%d", num % 2);
 }
 
 void	global()
 {
-	if (len == 7)
+	if (len == 8)
 	{
-		ft_printf("%c", reverse_bits(c));
+		ft_printf("message : %c\n", reverse_bits(c));
 		len = 0;
 		c = 0;
 	}
@@ -50,11 +52,8 @@ void	prt() // SIGUSR2 = 1
 {
 	len++;
 	c++;
-	// ft_printf("%d\n", c);
 	c = c << 1;
 	global();
-	
-	// ft_printf("%d, %d\n", c, len);
 }
 
 void	receive() // SIGURS1 = 0
@@ -62,8 +61,6 @@ void	receive() // SIGURS1 = 0
 	len++;
 	c = c << 1;
 	global();
-
-	// ft_printf("%d, %d\n", c, len);
 }
 
 int	main(void)
@@ -74,3 +71,5 @@ int	main(void)
 	while (1)
 		pause();
 }
+//c fondtionne que seul et plusieur ce transforme en sqqqqqq
+//sureemnt un decalage de bite non prevue

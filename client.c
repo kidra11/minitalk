@@ -54,11 +54,10 @@ void	client(int pid, char *str)
 	char	c;
 
 	i = -1;
-	// c = 'c';
-	// (void) str;
 	while (str[++i])
 	{
-		c = str[i];
+		c = 128;
+		// c = str[i];
 		printBinary(c, pid);
 	}
 }
