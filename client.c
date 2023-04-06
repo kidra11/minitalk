@@ -35,46 +35,46 @@ int	ft_atoi(const char *str)
   return (res * sign);
 }
 
-//'c' = 0110 0011
-
-void printBinary(unsigned int num, int pid) {
-    if (num > 1) {
-        printBinary(num / 2, pid);
-    }
-    if (num % 2 == 1)
-		kill(pid, SIGUSR2);
-	else
-		kill(pid, SIGUSR1);
-	usleep(500);
-}
-
-void	client(int pid, char *str)
+void	send_char(char *str, int pid)
 {
-	int		i;
+	int 	i;
 	char	c;
 
-	i = -1;
-	while (str[++i])
+	while (str)
 	{
-		c = 128;
-		// c = str[i];
-		printBinary(c, pid);
+		i = 0;
+		c = *str;
+		while (i < 8)
+		{
+			if ((c >> i) & 1)
+				kill(pid, SIGUSR2);
+			else
+				kill(pid, SIGUSR1);
+			i++;
+			usleep(500);
+		}
+		str++;
 	}
 }
- 
+
+void	receive_true(int sig, siginfo_t *info, void *context)
+{
+	(void)info;
+	(void)context;
+	if (sig == SIGUSR1)
+		ft_printf("Message received\n");
+}
+
 int	main(int ac, char **av)
-{	
+{
+	struct sigaction sa;
+
+	sa.sa_sigaction = &receive_true;
+	sa.sa_flags = 0;
+	sigemptyset(&sa.sa_mask);
+	sigaction(SIGUSR1, &sa, NULL);
 	if (ac != 3)
 		return (ft_printf("client usage : ./client [PID] [message]"));
 	if (ft_atoi(av[1]) > 0)
-		client(ft_atoi(av[1]), av[2]);
+		send_char(av[2], ft_atoi(av[1]));
 }
-
-// int i = 0;
-
-// 0000 0000
-// i += 1;
-// 0000 0001
-// i = i << 1;
-// 1000 0010
-// i = i << 8
