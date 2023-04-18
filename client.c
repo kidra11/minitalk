@@ -35,46 +35,35 @@ int	ft_atoi(const char *str)
   return (res * sign);
 }
 
-void	send_char(char *str, int pid)
-{
-	int 	i;
-	char	c;
-
-	while (str)
-	{
-		i = 0;
-		c = *str;
-		while (i < 8)
-		{
-			if ((c >> i) & 1)
-				kill(pid, SIGUSR2);
-			else
-				kill(pid, SIGUSR1);
-			i++;
-			usleep(500);
-		}
-		str++;
-	}
-}
-
-void	receive_true(int sig, siginfo_t *info, void *context)
-{
-	(void)info;
-	(void)context;
-	if (sig == SIGUSR1)
-		ft_printf("Message received\n");
-}
-
 int	main(int ac, char **av)
 {
-	struct sigaction sa;
+	  int pid;
+  int i;
+  int j;
+  char c;
 
-	sa.sa_sigaction = &receive_true;
-	sa.sa_flags = 0;
-	sigemptyset(&sa.sa_mask);
-	sigaction(SIGUSR1, &sa, NULL);
-	if (ac != 3)
-		return (ft_printf("client usage : ./client [PID] [message]"));
-	if (ft_atoi(av[1]) > 0)
-		send_char(av[2], ft_atoi(av[1]));
+  if (ac != 3)
+	{
+	  write(1, "Usage: ./client [PID] [message]\n", 32);
+	  return (0);
+	}
+  pid = ft_atoi(av[1]);
+  i = 0;
+  while (av[2][i])
+	{
+	  j = 0;
+	  c = av[2][i];
+	  while (j < 8)
+		{
+		  if (c & 1)
+			kill(pid, SIGUSR1);
+		  else
+			kill(pid, SIGUSR2);
+		  c = c >> 1;
+		  j++;
+		  usleep(100);
+		}
+	  i++;
+	}
+  return (0);
 }
