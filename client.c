@@ -24,14 +24,14 @@ void	check(int signal)
 
 int	ft_atoi(const char *str)
 {
-	int i;
-	int sign;
-	int res;
+	int	i;
+	int	sign;
+	int	res;
 
 	i = 0;
 	sign = 1;
 	res = 0;
-	while (str[i] == ' ' || str[i] == '\t' || str[i] == '\n' || str[i] == '\v' || str[i] == '\f' || str[i] == '\r')
+	while (str[i] == ' ' || str[i] == '\n')
 		i++;
 	if (str[i] == '-')
 		sign = -1;
@@ -47,27 +47,27 @@ int	ft_atoi(const char *str)
 
 void	send(int pid, char c)
 {
-	int bit;
+	int	bit;
 
 	bit = 0;
 	while (bit < 8)
 	{
 		g_conf = 0;
-		if (c & (1 << bit))//on vérifie si le bit à la position bit dans la variable message est égal à 1
+		if (c & (1 << bit))
 		{
 			if (kill(pid, SIGUSR1) == -1)
-        		exit(ft_printf("Error while sending"));
+				exit(ft_printf("Error while sending"));
 		}
 		else
 		{
 			if (kill(pid, SIGUSR2) == -1)
-    	        exit(ft_printf("Error while sending"));
+				exit(ft_printf("Error while sending"));
 		}
 		bit++;
-		while(1)
+		while (1)
 		{
 			if (g_conf == 1)
-				break;
+				break ;
 			else if (g_conf == 2)
 				exit(ft_printf("Message send!\n"));
 		}
@@ -76,8 +76,8 @@ void	send(int pid, char c)
 
 int	main(int ac, char **av)
 {
-	int pid;
-	int i;
+	int	pid;
+	int	i;
 
 	if (ac != 3)
 	{
