@@ -12,58 +12,89 @@
 
 #include "minitalk.h"
 
+int	g_conf = 1;
+
+void	check(int signal)
+{
+	if (signal == SIGUSR1)
+		g_conf = 1;
+	else if (signal == SIGUSR2)
+		g_conf = 2;
+}
+
 int	ft_atoi(const char *str)
 {
-  int i;
-  int sign;
-  int res;
+	int i;
+	int sign;
+	int res;
 
-  i = 0;
-  sign = 1;
-  res = 0;
-  while (str[i] == ' ' || str[i] == '\t' || str[i] == '\n' || str[i] == '\v' || str[i] == '\f' || str[i] == '\r')
-	i++;
-  if (str[i] == '-')
-	sign = -1;
-  if (str[i] == '-' || str[i] == '+')
-	i++;
-  while (str[i] >= '0' && str[i] <= '9')
+	i = 0;
+	sign = 1;
+	res = 0;
+	while (str[i] == ' ' || str[i] == '\t' || str[i] == '\n' || str[i] == '\v' || str[i] == '\f' || str[i] == '\r')
+		i++;
+	if (str[i] == '-')
+		sign = -1;
+	if (str[i] == '-' || str[i] == '+')
+		i++;
+	while (str[i] >= '0' && str[i] <= '9')
 	{
-	  res = res * 10 + str[i] - '0';
-	  i++;
+		res = res * 10 + str[i] - '0';
+		i++;
 	}
-  return (res * sign);
+	return (res * sign);
+}
+
+void	send(int pid, char c)
+{
+	int bit;
+
+	bit = 0;
+	while (bit < 8)
+	{
+		g_conf = 0;
+		if (c & (1 << bit))//on vérifie si le bit à la position bit dans la variable message est égal à 1
+		{
+			if (kill(pid, SIGUSR1) == -1)
+        		exit(ft_printf("Error while sending"));
+		}
+		else
+		{
+			if (kill(pid, SIGUSR2) == -1)
+    	        exit(ft_printf("Error while sending"));
+		}
+		bit++;
+		while(1)
+		{
+			if (g_conf == 1)
+				break;
+			else if (g_conf == 2)
+				exit(ft_printf("Message send!\n"));
+		}
+	}
 }
 
 int	main(int ac, char **av)
 {
-	  int pid;
-  int i;
-  int j;
-  char c;
+	int pid;
+	int i;
 
-  if (ac != 3)
+	if (ac != 3)
 	{
-	  write(1, "Usage: ./client [PID] [message]\n", 32);
-	  return (0);
+		exit(ft_printf("Usage: ./client [PID] [message]\n"));
 	}
-  pid = ft_atoi(av[1]);
-  i = 0;
-  while (av[2][i])
+	if (ft_atoi(av[1]) <= 0)
+		exit(ft_printf("Wrong PID\n"));
+	pid = ft_atoi(av[1]);
+	signal(SIGUSR1, check);
+	signal(SIGUSR2, check);
+	i = 0;
+	while (av[2][i])
 	{
-	  j = 0;
-	  c = av[2][i];
-	  while (j < 8)
-		{
-		  if (c & 1)
-			kill(pid, SIGUSR1);
-		  else
-			kill(pid, SIGUSR2);
-		  c = c >> 1;
-		  j++;
-		  usleep(100);
-		}
-	  i++;
+		send(pid, av[2][i]);
+		i++;
 	}
-  return (0);
+	send(pid, '\n');
+	send(pid, '\0');
+	return (0);
 }
