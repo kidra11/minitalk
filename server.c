@@ -12,7 +12,14 @@
 
 #include "minitalk.h"
 
-void 		receive(int signum, siginfo_t *siginfo, void *texte)
+void	send_error(siginfo_t *siginfo, int signal)
+{
+	(void)(siginfo);
+	if (kill(siginfo->si_pid, signal) == -1)
+		exit(ft_printf("Error while sending"));
+}
+
+void	receive(int signum, siginfo_t *siginfo, void *texte)
 {
 	static int	bit = 0;
 	static char	c = 0;
@@ -27,38 +34,31 @@ void 		receive(int signum, siginfo_t *siginfo, void *texte)
 		ft_printf("%c", c);
 		if (c == '\0')
 		{
-			if (kill(siginfo->si_pid, SIGUSR2) == -1)
-				exit(ft_printf("Error while sending"));
+			send_error(siginfo, SIGUSR2);
 		}
 		else
-		{
-			if (kill(siginfo->si_pid, SIGUSR1) == -1)
-			exit(ft_printf("Error while sending"));
-		}
+			send_error(siginfo, SIGUSR1);
 		c = 0;
 		bit = 0;
 	}
 	else
-	{
-		if (kill(siginfo->si_pid, SIGUSR1) == -1)
-			exit(ft_printf("Error while sending"));
-	}
+		send_error(siginfo, SIGUSR1);
 }
 
 int	main(void)
 {
-	int pid;
-	struct sigaction sa;
+	int					pid;
+	struct sigaction	sa;
 
-    pid = getpid();
+	pid = getpid();
 	ft_printf("Le PID est : %d\n", pid);
 	sa.sa_sigaction = receive;
-    sigemptyset(&sa.sa_mask);
-    sa.sa_flags = SA_SIGINFO;
-    while (1)
+	sigemptyset(&sa.sa_mask);
+	sa.sa_flags = SA_SIGINFO;
+	while (1)
 	{
 		sigaction(SIGUSR1, &sa, NULL);
 		sigaction(SIGUSR2, &sa, NULL);
 	}
-    return (0);
+	return (0);
 }
